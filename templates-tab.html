@@ -1,0 +1,52 @@
+<!-- Templates Tab Content -->
+<div class="card">
+    <h2>Upload Template</h2>
+    <form id="template-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="template-file">Template File (PNG)</label>
+            <input type="file" id="template-file" name="template_file" accept=".png" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="template-name">Template Name</label>
+            <input type="text" id="template-name" name="template_name" placeholder="My Custom Template" required>
+        </div>
+        
+        <input type="hidden" id="icon-code" name="icon_code" value="\ue90d">
+        
+        <button type="submit" id="upload-btn" class="icon-btn upload-btn">Upload to Local Library</button>
+    </form>
+</div>
+
+<div class="libraries-container">
+    <div class="library-section card">
+        <div class="library-header">
+            <h2>Local Library</h2>
+            <button id="refresh-local" class="refresh-btn">Refresh</button>
+        </div>
+        <div class="library-grid" id="local-templates-grid">
+            <!-- Local templates will be displayed here -->
+            <div class="template-item">
+                <h3>Loading local templates...</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="library-section card">
+        <div class="library-header">
+            <h2>Device Library</h2>
+            <button id="refresh-device" class="refresh-btn">Refresh</button>
+        </div>
+        <div class="library-grid" id="device-templates-grid">
+            <!-- Device templates will be displayed here -->
+            <div class="template-item">
+                <h3>Loading device templates...</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Device Control</h2>
+    <button id="restart-btn" class="restart-btn" disabled>Restart reMarkable</button>
+</div>

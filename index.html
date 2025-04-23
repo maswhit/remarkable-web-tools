@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reMarkable Template Manager</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <!-- Hamburger Menu Button with Unicode symbol -->
+    <div class="open-menu" onclick="openNav()">
+        ☰
+    </div>
+    
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">×</a>
+        <div class="settings-form">
+            <h3 style="color: white;">Device Settings</h3>
+            <div class="form-group">
+                <label for="remarkable-ip">reMarkable IP</label>
+                <input type="text" id="remarkable-ip" placeholder="192.168.1.x">
+            </div>
+            <div class="form-group">
+                <label for="remarkable-user">Username</label>
+                <input type="text" id="remarkable-user" placeholder="root">
+            </div>
+            <div class="form-group">
+                <label for="remarkable-password">Password</label>
+                <input type="password" id="remarkable-password" placeholder="Password">
+            </div>
+            <button id="save-settings">Save Settings</button>
+        </div>
+    </div>
+    
+    <h1>reMarkable Template Manager</h1>
+    
+    <div class="card">
+        <div class="status">
+            <div id="connection-indicator" class="status-indicator disconnected"></div>
+            <span id="connection-status">Not connected</span>
+        </div>
+        <button id="refresh-connection" class="refresh-btn">Refresh Connection</button>
+        
+        <h3>Log</h3>
+        <div id="log-container" class="log-container"></div>
+    </div>
+    
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+        <button class="tab-button active" data-tab="templates">Templates</button>
+        <button class="tab-button" data-tab="future">Future Tab</button>
+    </div>
+    
+    <!-- Tab Content Container -->
+    <div id="tab-content-container">
+        <!-- Content will be loaded dynamically -->
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/templates.js"></script>
+</body>
+</html>
