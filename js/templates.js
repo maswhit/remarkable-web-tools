@@ -1,10 +1,12 @@
 // Template tab variables (will be initialized when the tab loads)
 let templateForm;
-let restartBtn;
 let localTemplatesGrid;
 let deviceTemplatesGrid;
 let refreshLocalBtn;
 let refreshDeviceBtn;
+let restartBtn;
+
+initTemplatesTab();
 
 // Initialize the templates tab functionality
 function initTemplatesTab() {
