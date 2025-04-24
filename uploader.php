@@ -599,6 +599,125 @@ function saveSettingsFromRequest(): array {
 }
 
 // -----------------------------------------------------------------------------
+// System Images Functions
+// -----------------------------------------------------------------------------
+
+// Get list of PNG images in /usr/share/remarkable directory (top-level only, no subdirectories)
+function getSystemImages(): array {
+    // Check connection first
+    $connection = checkConnection();
+    if (!$connection['success']) {
+        return ['success' => false, 'message' => 'Not connected to reMarkable: ' . $connection['message']];
+    }
+    
+    // Execute command to find PNG files in top-level directory only (no subdirectories)
+    // Using find with maxdepth=1 to limit to just the top-level directory
+    $findCmd = "find /usr/share/remarkable -maxdepth 1 -name '*.png' -type f | sort";
+    $result = executeSSHCommand($findCmd);
+    
+    if (!$result['success']) {
+        return ['success' => false, 'message' => 'Failed to list system images: ' . $result['message']];
+    }
+    
+    // Process files
+    $files = explode("\n", trim($result['message']));
+    $images = [];
+    
+    foreach ($files as $file) {
+        if (empty(trim($file))) continue;
+        
+        // Get file size
+        $sizeCmd = "stat -c%s " . escapeshellarg($file);
+        $sizeResult = executeSSHCommand($sizeCmd);
+        $size = $sizeResult['success'] ? intval($sizeResult['message']) : 0;
+        
+        // Extract filename
+        $filename = basename($file);
+        
+        $images[] = [
+            'filename' => $filename,
+            'path' => $file,
+            'size' => $size
+        ];
+    }
+    
+    return ['success' => true, 'images' => $images];
+}
+
+// Get a thumbnail of a system image
+function getSystemImageThumbnail(string $path): array {
+    // Check connection first
+    $connection = checkConnection();
+    if (!$connection['success']) {
+        return ['success' => false, 'message' => 'Not connected to reMarkable'];
+    }
+    
+    // Create temp file
+    $tmpFile = tempnam(sys_get_temp_dir(), 'remarkable_img_');
+    
+    // Download file
+    $download = downloadFile($path, $tmpFile);
+    if (!$download['success']) {
+        return ['success' => false, 'message' => 'Failed to download image: ' . $download['message']];
+    }
+    
+    // Return image data
+    header('Content-Type: image/png');
+    readfile($tmpFile);
+    unlink($tmpFile);
+    exit; // Exit after sending image data
+}
+
+// Get full system image
+function getSystemImageFull(string $path): array {
+    // Same implementation as thumbnail for now, 
+    // but could be modified to serve full-size images differently if needed
+    return getSystemImageThumbnail($path);
+}
+
+// Replace a system image with a template from local library
+function replaceSystemImage(string $targetPath, string $replacementFilename): array {
+    // Check connection first
+    $connection = checkConnection();
+    if (!$connection['success']) {
+        return ['success' => false, 'message' => 'Not connected to reMarkable: ' . $connection['message']];
+    }
+    
+    $library = initLocalLibrary();
+    $uploadsDir = $library['uploadsDir'];
+    
+    $localPath = $uploadsDir . '/' . $replacementFilename;
+    if (!file_exists($localPath)) {
+        return ['success' => false, 'message' => 'Template file not found in local library'];
+    }
+    
+    // Backup original file
+    $backupCmd = "cp " . escapeshellarg($targetPath) . " " . escapeshellarg($targetPath . '.backup');
+    $backupResult = executeSSHCommand($backupCmd);
+    
+    if (!$backupResult['success']) {
+        return ['success' => false, 'message' => 'Failed to backup original file: ' . $backupResult['message']];
+    }
+    
+    // Upload replacement file
+    $upload = uploadFile($localPath, $targetPath);
+    
+    if (!$upload['success']) {
+        return ['success' => false, 'message' => 'Failed to upload replacement: ' . $upload['message']];
+    }
+    
+    // Set correct permissions
+    $chmodCmd = "chmod 644 " . escapeshellarg($targetPath);
+    $chmodResult = executeSSHCommand($chmodCmd);
+    
+    if (!$chmodResult['success']) {
+        return ['success' => false, 'message' => 'Failed to set permissions: ' . $chmodResult['message']];
+    }
+    
+    return ['success' => true, 'message' => 'System image replaced successfully'];
+}
+
+// -----------------------------------------------------------------------------
 // Router
 // -----------------------------------------------------------------------------
 try {
@@ -655,6 +774,34 @@ try {
             break;
         case 'save_settings':
             echo json_encode(saveSettingsFromRequest());
+            break;
+        case 'get_system_images':
+            echo json_encode(getSystemImages());
+            break;
+        case 'get_system_image_thumbnail':
+            $path = $_GET['path'] ?? '';
+            if (!$path) {
+                echo json_encode(['success' => false, 'message' => 'Missing path parameter']);
+                break;
+            }
+            getSystemImageThumbnail($path);
+            break;
+        case 'get_system_image_full':
+            $path = $_GET['path'] ?? '';
+            if (!$path) {
+                echo json_encode(['success' => false, 'message' => 'Missing path parameter']);
+                break;
+            }
+            getSystemImageFull($path);
+            break;
+        case 'replace_system_image':
+            $targetPath = $_POST['target_path'] ?? '';
+            $replacementFilename = $_POST['replacement_filename'] ?? '';
+            if (!$targetPath || !$replacementFilename) {
+                echo json_encode(['success' => false, 'message' => 'Missing target path or replacement filename']);
+                break;
+            }
+            echo json_encode(replaceSystemImage($targetPath, $replacementFilename));
             break;
         default:
             echo json_encode(['success' => false, 'message' => 'Invalid action: ' . $action]);

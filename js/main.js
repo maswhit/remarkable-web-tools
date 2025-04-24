@@ -24,6 +24,16 @@ const tabs = {
             }
         }
     },
+    'system-images': {
+        title: 'System Images',
+        file: 'system-images-tab.html',
+        init: function() {
+            // Initialize system images tab (handled in system-images.js)
+            if (typeof initSystemImagesTab === 'function') {
+                initSystemImagesTab();
+            }
+        }
+    },
     'future': {
         title: 'Future Tab',
         file: 'future-tab.html',

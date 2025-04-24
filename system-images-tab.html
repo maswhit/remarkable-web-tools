@@ -1,0 +1,160 @@
+<!-- System Images Tab Content -->
+<div class="card">
+    <h2>System Images Manager</h2>
+    <p>This tab allows you to view and modify PNG image files in the /usr/share/remarkable directory on your reMarkable device.</p>
+    <div class="info-box">
+        <p class="warning">⚠️ Caution: Modifying system images may affect your device's appearance. Make backups before replacing files.</p>
+    </div>
+    <button id="refresh-system-images" class="refresh-btn icon-btn">Refresh Images List</button>
+</div>
+
+<div class="card">
+    <div class="system-images-container">
+        <h2>Device System Images</h2>
+        <div id="system-images-grid" class="system-images-grid">
+            <!-- Images will be displayed here -->
+            <div class="system-image-item">
+                <h3>Loading system images...</h3>
+                <p>Please wait while we fetch images from your device.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div id="image-preview-modal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <h2 id="preview-image-name">Image Preview</h2>
+        <div class="preview-container">
+            <img id="preview-image" src="" alt="Preview" />
+        </div>
+        <div class="preview-actions">
+            <div class="form-group">
+                <label for="replacement-select">Replace with:</label>
+                <select id="replacement-select">
+                    <option value="">Select a template from your library...</option>
+                </select>
+            </div>
+            <button id="replace-image-btn" class="icon-btn upload-btn" disabled>Replace Image</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .system-images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .system-image-item {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .system-image-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .system-image-item h3 {
+        margin-top: 0;
+        font-size: 16px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
+    
+    .system-image-item p {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+    
+    .system-image-thumbnail {
+        width: 100%;
+        height: 120px;
+        object-fit: contain;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+    
+    .info-box {
+        background-color: #e8f4fd;
+        border-left: 4px solid #2196F3;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-radius: 0 4px 4px 0;
+    }
+    
+    .warning {
+        color: #856404;
+    }
+    
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 800px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .modal-close:hover {
+        color: #333;
+    }
+    
+    .preview-container {
+        text-align: center;
+        margin: 15px 0;
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 4px;
+    }
+    
+    .preview-container img {
+        max-width: 100%;
+        max-height: 400px;
+        border: 1px solid #ddd;
+    }
+    
+    .preview-actions {
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .preview-actions .form-group {
+        flex: 1;
+    }
+</style>
