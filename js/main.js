@@ -6,6 +6,7 @@ const logContainer = document.getElementById('log-container');
 const saveSettingsBtn = document.getElementById('save-settings');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabContentContainer = document.getElementById('tab-content-container');
+const restartBtn = document.getElementById('restart-btn');
 
 // Settings fields
 const remarkableIpField = document.getElementById('remarkable-ip');
@@ -14,6 +15,17 @@ const remarkablePasswordField = document.getElementById('remarkable-password');
 
 // Tab configuration - Add new tabs here
 const tabs = {
+    // Put PDF Uploads first and set as default
+    'pdf-uploads': {
+        title: 'PDF Uploads',
+        file: 'pdf-uploads-tab.html',
+        init: function() {
+            // Initialize PDF uploads tab
+            if (typeof initPdfUploadsTab === 'function') {
+                initPdfUploadsTab();
+            }
+        }
+    },
     'templates': {
         title: 'Templates',
         file: 'templates-tab.html',
@@ -34,13 +46,13 @@ const tabs = {
             }
         }
     },
-    'pdf-uploads': {
-        title: 'PDF Uploads',
-        file: 'pdf-uploads-tab.html',
+    'configuration': {
+        title: 'Configuration',
+        file: 'configuration-tab.html',
         init: function() {
-            // Initialize PDF uploads tab
-            if (typeof initPdfUploadsTab === 'function') {
-                initPdfUploadsTab();
+            // Initialize configuration tab
+            if (typeof initConfigurationTab === 'function') {
+                initConfigurationTab();
             }
         }
     },
@@ -52,12 +64,6 @@ const tabs = {
             console.log('Future tab initialized');
         }
     }
-    // Add more tabs as needed:
-    // 'newtab': {
-    //     title: 'New Tab',
-    //     file: 'newtab-tab.html',
-    //     init: function() { /* initialization code */ }
-    // }
 };
 
 // Initialize
@@ -73,6 +79,50 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load the initial active tab
     loadActiveTab();
+    
+    // Setup restart button listener
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+            if (!confirm('Are you sure you want to restart your reMarkable?')) {
+                return;
+            }
+            
+            log('Restarting reMarkable...', 'info');
+            restartBtn.disabled = true;
+            
+            fetch('uploader.php?action=restart_remarkable')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        log('Restart command sent. Your reMarkable will reboot now.', 'success');
+                        setConnectionStatus('disconnected', 'Disconnected (reMarkable is restarting)');
+                        restartBtn.disabled = true;
+                        
+                        // Wait for device to restart
+                        setTimeout(() => {
+                            log('Waiting for reMarkable to come back online...', 'info');
+                            
+                            // Try to reconnect after some time
+                            setTimeout(() => {
+                                checkConnection();
+                            }, 20000); // Wait 20 seconds before trying to reconnect
+                        }, 5000);
+                    } else {
+                        log(`Restart failed: ${data.message}`, 'error');
+                        restartBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    log(`Restart error: ${error.message}`, 'error');
+                    restartBtn.disabled = false;
+                });
+        });
+    }
 });
 
 // Sidebar functions
@@ -243,6 +293,7 @@ function checkConnection() {
         .then(data => {
             if (data.success) {
                 setConnectionStatus('connected', 'Connected to reMarkable');
+                if (restartBtn) restartBtn.disabled = false;
                 
                 // If the templates tab is loaded, refresh its data
                 if (typeof refreshTemplateData === 'function') {
@@ -253,6 +304,7 @@ function checkConnection() {
                 document.dispatchEvent(new CustomEvent('remarkableConnected'));
             } else {
                 setConnectionStatus('disconnected', `Failed to connect: ${data.message}`);
+                if (restartBtn) restartBtn.disabled = true;
                 
                 // Dispatch a custom event for disconnection
                 document.dispatchEvent(new CustomEvent('remarkableDisconnected'));
@@ -260,6 +312,7 @@ function checkConnection() {
         })
         .catch(error => {
             setConnectionStatus('disconnected', `Connection error: ${error.message}`);
+            if (restartBtn) restartBtn.disabled = true;
             
             // Dispatch a custom event for disconnection
             document.dispatchEvent(new CustomEvent('remarkableDisconnected'));

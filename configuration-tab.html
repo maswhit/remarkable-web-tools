@@ -1,0 +1,121 @@
+<!-- Configuration Tab Content -->
+<div class="card">
+    <h2>Device Configuration</h2>
+    <div class="warning-box">
+        <h3>⚠️ Warning: Advanced Settings</h3>
+        <p>Editing the xochitl.conf file directly affects your reMarkable device's behavior. Incorrect changes may cause system instability or unexpected behavior.</p>
+        <p>Only make changes if you understand what you're doing. Consider making a backup of your configuration first.</p>
+    </div>
+    
+    <div id="config-container">
+        <div class="config-actions">
+            <button id="load-config-btn" class="refresh-btn">Load Current Configuration</button>
+            <button id="backup-config-btn" class="refresh-btn">Backup Configuration</button>
+        </div>
+        
+        <div id="config-view-container" class="config-view-container">
+            <div id="config-view" class="config-view">
+                <p class="config-placeholder">Click "Load Current Configuration" to view the xochitl.conf file.</p>
+            </div>
+        </div>
+        
+        <div class="config-actions edit-actions">
+            <button id="enable-edit-btn" class="warning-btn" disabled>Enable Editing</button>
+        </div>
+        
+        <div id="config-edit-container" class="config-edit-container hidden">
+            <div class="warning-box small">
+                <p>⚠️ You are now editing the configuration file. Be careful with your changes.</p>
+            </div>
+            <textarea id="config-editor" class="config-editor" rows="15"></textarea>
+            <div class="edit-actions">
+                <button id="cancel-edit-btn" class="refresh-btn">Cancel</button>
+                <button id="save-config-btn" class="warning-btn">Save Changes & Restart Device</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .warning-box {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        border-radius: 0 4px 4px 0;
+    }
+    
+    .warning-box.small {
+        padding: 5px 10px;
+        margin-bottom: 10px;
+        font-size: 0.9em;
+    }
+    
+    .warning-box h3 {
+        color: #856404;
+        margin-top: 0;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #ffeeba;
+    }
+    
+    .config-view-container {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+        margin: 15px 0;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .config-view {
+        font-family: monospace;
+        white-space: pre-wrap;
+        line-height: 1.4;
+    }
+    
+    .config-placeholder {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .config-actions {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+    }
+    
+    .config-edit-container {
+        margin-top: 20px;
+    }
+    
+    .config-editor {
+        width: 100%;
+        font-family: monospace;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        resize: vertical;
+    }
+    
+    .edit-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+    
+    .warning-btn {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .warning-btn:hover {
+        background-color: #e0a800;
+    }
+    
+    .hidden {
+        display: none;
+    }
+</style>

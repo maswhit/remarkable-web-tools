@@ -4,15 +4,11 @@ let localTemplatesGrid;
 let deviceTemplatesGrid;
 let refreshLocalBtn;
 let refreshDeviceBtn;
-let restartBtn;
-
-initTemplatesTab();
 
 // Initialize the templates tab functionality
 function initTemplatesTab() {
     // Get DOM elements after the tab content is loaded
     templateForm = document.getElementById('template-form');
-    restartBtn = document.getElementById('restart-btn');
     localTemplatesGrid = document.getElementById('local-templates-grid');
     deviceTemplatesGrid = document.getElementById('device-templates-grid');
     refreshLocalBtn = document.getElementById('refresh-local');
@@ -20,7 +16,6 @@ function initTemplatesTab() {
     
     // Set up event listeners
     setupTemplateFormListener();
-    setupRestartBtnListener();
     setupRefreshButtons();
     
     // Load template data
@@ -46,8 +41,6 @@ function refreshTemplateData() {
 
 // Handle reMarkable connected event
 function handleRemarkableConnected() {
-    if (restartBtn) restartBtn.disabled = false;
-    
     // Enable device upload buttons
     document.querySelectorAll('.upload-to-device-btn').forEach(btn => {
         btn.disabled = false;
@@ -59,8 +52,6 @@ function handleRemarkableConnected() {
 
 // Handle reMarkable disconnected event
 function handleRemarkableDisconnected() {
-    if (restartBtn) restartBtn.disabled = true;
-    
     // Disable device upload buttons
     document.querySelectorAll('.upload-to-device-btn').forEach(btn => {
         btn.disabled = true;
@@ -76,16 +67,12 @@ function handleRemarkableDisconnected() {
 function updateUIByConnectionStatus() {
     const isConnected = document.getElementById('connection-indicator').classList.contains('connected');
     
-    if (restartBtn) {
-        restartBtn.disabled = !isConnected;
-    }
-    
     if (!isConnected && deviceTemplatesGrid) {
         deviceTemplatesGrid.innerHTML = '<div class="template-item"><h3>Not connected to device</h3><p>Please connect to your reMarkable to view device templates.</p></div>';
     }
 }
 
-// Set up template form submission
+// Setup template form submission
 function setupTemplateFormListener() {
     if (templateForm) {
         templateForm.addEventListener('submit', function(e) {
@@ -123,52 +110,6 @@ function setupTemplateFormListener() {
             .catch(function(error) {
                 log(`Upload error: ${error.message}`, 'error');
             });
-        });
-    }
-}
-
-// Setup restart button listener
-function setupRestartBtnListener() {
-    if (restartBtn) {
-        restartBtn.addEventListener('click', () => {
-            if (!confirm('Are you sure you want to restart your reMarkable?')) {
-                return;
-            }
-            
-            log('Restarting reMarkable...', 'info');
-            restartBtn.disabled = true;
-            
-            fetch('uploader.php?action=restart_remarkable')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        log('Restart command sent. Your reMarkable will reboot now.', 'success');
-                        setConnectionStatus('disconnected', 'Disconnected (reMarkable is restarting)');
-                        restartBtn.disabled = true;
-                        
-                        // Wait for device to restart
-                        setTimeout(() => {
-                            log('Waiting for reMarkable to come back online...', 'info');
-                            
-                            // Try to reconnect after some time
-                            setTimeout(() => {
-                                checkConnection();
-                            }, 20000); // Wait 20 seconds before trying to reconnect
-                        }, 5000);
-                    } else {
-                        log(`Restart failed: ${data.message}`, 'error');
-                        restartBtn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    log(`Restart error: ${error.message}`, 'error');
-                    restartBtn.disabled = false;
-                });
         });
     }
 }
@@ -257,10 +198,11 @@ function renderLocalTemplates(templates) {
             <h3>${template.name}</h3>
             <p>Filename: ${template.filename}</p>
             <div class="template-actions">
-                <button class="refresh-btn view-btn" data-filename="${template.filename}">View</button>
-                <button class="upload-to-device-btn" data-filename="${template.filename}" data-name="${template.name}" ${document.getElementById('connection-indicator').classList.contains('connected') ? '' : 'disabled'}>Upload to Device</button>
+                <button class="refresh-btn view-btn icon-btn" data-filename="${template.filename}">View</button>
+                <button class="upload-to-device-btn icon-btn upload-btn" data-filename="${template.filename}" data-name="${template.name}" ${document.getElementById('connection-indicator').classList.contains('connected') ? '' : 'disabled'}>Upload to Device</button>
             </div>
         `;
+        
         localTemplatesGrid.appendChild(templateEl);
     });
     
@@ -300,9 +242,10 @@ function renderDeviceTemplates(templates) {
             <h3>${template.name}</h3>
             <p>Filename: ${template.filename}</p>
             <div class="template-actions">
-                <button class="refresh-btn download-btn" data-filename="${template.filename}">Download</button>
+                <button class="refresh-btn download-btn icon-btn" data-filename="${template.filename}">Download</button>
             </div>
         `;
+        
         deviceTemplatesGrid.appendChild(templateEl);
     });
     

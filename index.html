@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <!-- Hamburger Menu Button with Unicode symbol -->
+    <!-- Hamburger Menu Button -->
     <div class="open-menu" onclick="openNav()">
         ☰
     </div>
@@ -16,7 +16,7 @@
     <div id="sidebar" class="sidebar">
         <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">×</a>
         <div class="settings-form">
-            <h3 style="color:white;">Device Settings</h3>
+            <h3>Device Settings</h3>
             <div class="form-group">
                 <label for="remarkable-ip">reMarkable IP</label>
                 <input type="text" id="remarkable-ip" placeholder="192.168.1.x">
@@ -35,20 +35,20 @@
     
     <h1>reMarkable Web Tools</h1>
     
-    
+
     <!-- Tabs Navigation -->
     <div class="tabs">
-        <button class="tab-button active" data-tab="pdf-uploads">API Upload</button>
+        <button class="tab-button active" data-tab="pdf-uploads">PDF Uploads</button>
         <button class="tab-button" data-tab="templates">Templates</button>
         <button class="tab-button" data-tab="system-images">System Images</button>
-        <button class="tab-button" data-tab="future">Future Tab</button>
+        <button class="tab-button" data-tab="configuration">Configuration</button>
     </div>
     
     <!-- Tab Content Container -->
     <div id="tab-content-container">
         <!-- Content will be loaded dynamically -->
     </div>
-
+    
     <div class="card">
         <div class="status">
             <div id="connection-indicator" class="status-indicator disconnected"></div>
@@ -60,10 +60,17 @@
         <div id="log-container" class="log-container"></div>
     </div>
 
+    <!-- Device Control Section - Moved here from templates tab -->
+    <div class="card" id="device-control-section">
+        <h2>Device Control</h2>
+        <button id="restart-btn" class="restart-btn" disabled>Restart reMarkable</button>
+    </div>
+
     <!-- Core Scripts -->
     <script src="js/main.js"></script>
     <script src="js/templates.js"></script>
     <script src="js/system-images.js"></script>
     <script src="js/pdf-uploads.js"></script>
+    <script src="js/configuration.js"></script>
 </body>
 </html>
