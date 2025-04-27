@@ -34,6 +34,16 @@ const tabs = {
             }
         }
     },
+    'pdf-uploads': {
+        title: 'PDF Uploads',
+        file: 'pdf-uploads-tab.html',
+        init: function() {
+            // Initialize PDF uploads tab
+            if (typeof initPdfUploadsTab === 'function') {
+                initPdfUploadsTab();
+            }
+        }
+    },
     'future': {
         title: 'Future Tab',
         file: 'future-tab.html',

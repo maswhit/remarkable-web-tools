@@ -1,0 +1,113 @@
+<!-- PDF Uploads Tab Content -->
+<div class="card">
+    <h2>Upload PDF to reMarkable</h2>
+    <p>Upload PDF files directly to your reMarkable device.</p>
+    
+    <div id="drop-area" class="drop-area">
+        <form id="pdf-upload-form" enctype="multipart/form-data">
+            <input type="file" id="pdf-file" name="pdf_file" accept=".pdf" class="file-input" required>
+            <label for="pdf-file" class="file-label">
+                <div class="drop-message">
+                    <i class="drop-icon">&#8595;</i>
+                    <p>Drag & drop PDF here<br>or click to select</p>
+                </div>
+            </label>
+        </form>
+    </div>
+    
+    <div id="upload-status" class="hidden">
+        <p>PDF uploaded successfully to your reMarkable device!</p>
+    </div>
+</div>
+
+<!-- Authentication Form (hidden by default) -->
+<div id="auth-form-container" class="card hidden">
+    <h2>reMarkable Authentication Required</h2>
+    <p>Please get a one-time code from the reMarkable website:</p>
+    <p><a href="https://my.remarkable.com/device/desktop?showOtp=true" target="_blank" class="auth-link">Get Your One-Time Code →</a></p>
+    
+    <form id="auth-form">
+        <div class="form-group">
+            <label for="one-time-code">Enter One-Time Code</label>
+            <input type="text" id="one-time-code" name="one_time_code" placeholder="8-character code" maxlength="8" required>
+        </div>
+        
+        <button type="submit" id="auth-submit-btn" class="icon-btn">Authenticate and Upload</button>
+    </form>
+</div>
+
+<style>
+    .hidden {
+        display: none;
+    }
+    
+    .auth-link {
+        display: inline-block;
+        color: #2196F3;
+        font-weight: bold;
+        text-decoration: none;
+        background-color: #e9f5fe;
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin: 10px 0;
+    }
+    
+    .auth-link:hover {
+        background-color: #d4eafd;
+    }
+    
+    #one-time-code {
+        font-family: monospace;
+        font-size: 18px;
+        letter-spacing: 2px;
+        text-align: center;
+    }
+    
+    .drop-area {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 30px;
+        text-align: center;
+        margin: 20px 0;
+        background-color: #f9f9f9;
+        transition: all 0.3s;
+    }
+    
+    .drop-area.highlight {
+        border-color: #4CAF50;
+        background-color: #e8f5e9;
+    }
+    
+    .file-input {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+    
+    .file-label {
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: pointer;
+    }
+    
+    .drop-icon {
+        font-size: 48px;
+        color: #2196F3;
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    .drop-message {
+        color: #666;
+    }
+    
+    .drop-message p {
+        margin: 0;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+</style>

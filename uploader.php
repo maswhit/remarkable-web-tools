@@ -599,6 +599,172 @@ function saveSettingsFromRequest(): array {
 }
 
 // -----------------------------------------------------------------------------
+// PDF Upload Functions
+// -----------------------------------------------------------------------------
+
+// Upload PDF to reMarkable with interactive authentication
+function uploadPdfToRemarkable(): array {
+    if (!isset($_FILES['pdf_file']) || $_FILES['pdf_file']['error'] !== UPLOAD_ERR_OK) {
+        // Check if we have a pending PDF from a previous upload
+        if (isset($_SESSION['pending_pdf']) && !empty($_POST['one_time_code'])) {
+            $destination = $_SESSION['pending_pdf']['filepath'];
+            
+            if (!file_exists($destination)) {
+                unset($_SESSION['pending_pdf']);
+                return [
+                    'success' => false,
+                    'message' => 'Pending PDF file not found. Please upload again.'
+                ];
+            }
+        } else {
+            return [
+                'success' => false,
+                'message' => 'No file uploaded or an upload error occurred: ' .
+                            ($_FILES['pdf_file']['error'] ?? 'unknown')
+            ];
+        }
+    } else {
+        $file = $_FILES['pdf_file'];
+        
+        // Check if it's a PDF
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'pdf') {
+            return ['success' => false, 'message' => 'Only PDF files are accepted'];
+        }
+        
+        // Create uploads directory if it doesn't exist
+        $uploadsDir = __DIR__ . '/uploads/pdfs';
+        if (!file_exists($uploadsDir)) {
+            mkdir($uploadsDir, 0755, true);
+        }
+        
+        // Create a config directory for rmapi
+        $configDir = __DIR__ . '/uploads/.config/rmapi';
+        if (!file_exists($configDir)) {
+            mkdir($configDir, 0755, true);
+        }
+        
+        // Generate a safe filename
+        $safeName = preg_replace('/\s+/', '_', $file['name']);
+        $safeName = preg_replace('/[^a-zA-Z0-9_.-]/i', '_', $safeName);
+        $destination = $uploadsDir . '/' . $safeName;
+        
+        // If file already exists, add a unique identifier
+        if (file_exists($destination)) {
+            $pathInfo = pathinfo($safeName);
+            $filename = $pathInfo['filename'];
+            $extension = $pathInfo['extension'] ?? 'pdf';
+            $destination = $uploadsDir . '/' . $filename . '_' . uniqid() . '.' . $extension;
+        }
+        
+        // Move the uploaded file to our uploads directory
+        if (!move_uploaded_file($file['tmp_name'], $destination)) {
+            return ['success' => false, 'message' => 'Failed to move uploaded file'];
+        }
+        
+        // Store file info for later use if we need authentication
+        $_SESSION['pending_pdf'] = [
+            'filename' => basename($destination),
+            'filepath' => $destination
+        ];
+    }
+    
+    // Check for one-time code
+    $otc = isset($_POST['one_time_code']) ? trim($_POST['one_time_code']) : '';
+    
+    // Set HOME environment variable
+    putenv("HOME=" . __DIR__ . "/uploads");
+    
+    if (empty($otc)) {
+        // Try uploading without authentication first
+        $command = "rmapi put " . escapeshellarg($destination) . " 2>&1";
+        exec($command, $output, $returnCode);
+        
+        $outputText = implode("\n", $output);
+        
+        // Check if we need authentication
+        if (strpos($outputText, "Enter one-time code") !== false || 
+            strpos($outputText, "Code has the wrong length") !== false) {
+            
+            return [
+                'success' => false,
+                'needs_auth' => true,
+                'message' => 'Authentication required to upload to reMarkable.'
+            ];
+        }
+        
+        // If upload succeeded
+        if ($returnCode === 0) {
+            // Clean up the file
+            if (file_exists($destination)) {
+                unlink($destination);
+            }
+            unset($_SESSION['pending_pdf']);
+            
+            return [
+                'success' => true,
+                'message' => 'PDF uploaded successfully to your reMarkable device.'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Failed to upload PDF. Error: ' . $outputText
+            ];
+        }
+    } else {
+        // Validate code format
+        if (strlen($otc) !== 8) {
+            return [
+                'success' => false,
+                'needs_auth' => true,
+                'message' => 'Invalid code. The one-time code should be 8 characters.'
+            ];
+        }
+        
+        // Instead of using expect, we'll pre-register the device in a separate step
+        $registerCmd = "echo " . escapeshellarg($otc) . " | rmapi register 2>&1";
+        exec($registerCmd, $registerOutput, $registerCode);
+        
+        $registerText = implode("\n", $registerOutput);
+        
+        // Now try to upload the file
+        $uploadCmd = "rmapi put " . escapeshellarg($destination) . " 2>&1";
+        exec($uploadCmd, $uploadOutput, $uploadCode);
+        
+        $uploadText = implode("\n", $uploadOutput);
+        
+        // Clean up the file if upload succeeded
+        if ($uploadCode === 0) {
+            if (file_exists($destination)) {
+                unlink($destination);
+            }
+            unset($_SESSION['pending_pdf']);
+            
+            return [
+                'success' => true,
+                'message' => 'PDF uploaded successfully to your reMarkable device.'
+            ];
+        } else {
+            // Check if authentication failed
+            if (strpos($registerText, "Invalid code") !== false || 
+                strpos($uploadText, "Invalid code") !== false) {
+                
+                return [
+                    'success' => false,
+                    'needs_auth' => true,
+                    'message' => 'Invalid authentication code. Please try again.'
+                ];
+            }
+            
+            return [
+                'success' => false,
+                'message' => 'Failed to upload PDF. Registration: ' . $registerText . ' Upload: ' . $uploadText
+            ];
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
 // System Images Functions
 // -----------------------------------------------------------------------------
 
@@ -803,6 +969,9 @@ try {
             }
             echo json_encode(replaceSystemImage($targetPath, $replacementFilename));
             break;
+            case 'upload_pdf':
+                echo json_encode(uploadPdfToRemarkable());
+                break;
         default:
             echo json_encode(['success' => false, 'message' => 'Invalid action: ' . $action]);
             break;
