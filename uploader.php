@@ -776,9 +776,8 @@ function getSystemImages(): array {
         return ['success' => false, 'message' => 'Not connected to reMarkable: ' . $connection['message']];
     }
     
-    // Execute command to find PNG files in top-level directory only (no subdirectories)
-    // Using find with maxdepth=1 to limit to just the top-level directory
-    $findCmd = "find /usr/share/remarkable -maxdepth 1 -name '*.png' -type f | sort";
+    // Find PNG files in top-level directory only
+    $findCmd = "find /usr/share/remarkable -maxdepth 1 -type f -iname '*.png' | sort";
     $result = executeSSHCommand($findCmd);
     
     if (!$result['success']) {
@@ -790,12 +789,20 @@ function getSystemImages(): array {
     $images = [];
     
     foreach ($files as $file) {
-        if (empty(trim($file))) continue;
-        
-        // Get file size
+        $file = trim($file);
+        if ($file === '') continue;
+
+        // BACKEND FILTER: Ensure it's a .png file (extra safety)
+        if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) !== 'png') {
+            continue; // Skip anything not ending with .png
+        }
+
+        // Get file size safely
         $sizeCmd = "stat -c%s " . escapeshellarg($file);
         $sizeResult = executeSSHCommand($sizeCmd);
-        $size = $sizeResult['success'] ? intval($sizeResult['message']) : 0;
+        $size = ($sizeResult['success'] && is_numeric(trim($sizeResult['message'])))
+            ? intval(trim($sizeResult['message']))
+            : 0;
         
         // Extract filename
         $filename = basename($file);
@@ -809,6 +816,7 @@ function getSystemImages(): array {
     
     return ['success' => true, 'images' => $images];
 }
+
 
 // Get a thumbnail of a system image
 function getSystemImageThumbnail(string $path): array {

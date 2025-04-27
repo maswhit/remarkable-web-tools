@@ -162,7 +162,7 @@ function renderSystemImages(images) {
                  alt="${image.filename}" class="system-image-thumbnail">
             <h3>${image.filename}</h3>
             <p>Size: ${formatFileSize(image.size)}</p>
-            <p>Path: ${image.path}</p>
+            <!--<p>Path: ${image.path}</p>-->
         `;
         
         // Add click event to open preview
