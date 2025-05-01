@@ -62,7 +62,8 @@ To connect to your reMarkable device:
    - Your **local IP address** of the reMarkable device
    - Your **device password** (used for SSH)
 3. If uploading via the Cloud API:
-   - Click **"Authenticate with reMarkable"**
-   - Follow the browser-based login flow
+   - Upload a file through the PDF Uploads tab
+   - If unauthenticated, the browser will direct you to the reMarkable link to get an API code
+   - Follow the directions to authenticate the app
 
 ---
