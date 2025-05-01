@@ -36,7 +36,7 @@
 Use the included script:
 
 ```bash
-./run.sh
+./run.sh'''
 
 - This launches a PHP web server at [http://localhost:6500](http://localhost:6500)
 - The tool will open automatically in your default browser
