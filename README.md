@@ -1,11 +1,13 @@
 # reMarkable Web Tools
 
+*Note: This has been tested with the reMarkable 2 only.*
+
 **reMarkable Web Tools** is a lightweight web-based GUI that enables users to manage and interact with their reMarkable tablet through a browser. It includes:
 
-- ✅ Upload and manage custom **templates**
-- ✅ View and replace **system screen images** (e.g., sleeping, poweroff)
-- ✅ Edit the raw **configuration file** directly
-- ✅ Upload documents via the **reMarkable Cloud API**
+- Upload and manage custom **templates**
+- View and replace **system screen images** (e.g., sleeping, poweroff)
+- Edit the raw **configuration file** directly
+- Upload documents via the **reMarkable Cloud API**
 
 ---
 
